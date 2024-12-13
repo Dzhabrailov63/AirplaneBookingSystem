@@ -1,0 +1,43 @@
+﻿﻿<BarMenu>
+    <BarStart>
+        <BarItem TextAlignment="TextAlignment.Start">
+            <BarLink To="@_airplanesLink">
+                <BarIcon IconName="IconName.Plane" />
+                Airplanes
+            </BarLink>
+        </BarItem>
+        <BarItem TextAlignment="TextAlignment.Start">
+            <BarLink To="@_ticketsLink">
+                <BarIcon IconName="IconName.Ticket" />
+                Tickets
+            </BarLink>
+        </BarItem>
+        <BarItem TextAlignment="TextAlignment.Start">
+            <BarLink To="@_flightsLink">
+                <BarIcon IconName="IconName.PlaneDeparture" />
+                Flights
+            </BarLink>
+        </BarItem>
+        <BarItem TextAlignment="TextAlignment.Start">
+            <BarLink To="@_clientsLink">
+                <BarIcon IconName="IconName.UserFriends" />
+                Clients
+            </BarLink>
+        </BarItem>
+        <BarItem TextAlignment="TextAlignment.Start">
+            <BarLink To="@_analyticsLink">
+                <BarIcon IconName="IconName.Zoom" />
+                Analytics
+            </BarLink>
+        </BarItem>
+    </BarStart>
+</BarMenu>
+
+@code {
+    private string _userProfileLink = "user-profile";
+    private string _airplanesLink = "airplanes";
+    private string _ticketsLink = "tickets";
+    private string _flightsLink = "flights";
+    private string _clientsLink = "clients";
+    private string _analyticsLink = "analytics";
+}

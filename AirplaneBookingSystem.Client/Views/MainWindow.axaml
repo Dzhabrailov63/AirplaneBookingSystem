@@ -1,0 +1,139 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AirplaneBookingSystem.Client.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="750"
+        x:Class="AirplaneBookingSystem.Client.Views.MainWindow"
+        Icon="/Assets/icon.ico"
+        Title="AirplaneBookingSystem.Client">
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+	<Window.Styles>
+		<StyleInclude Source="/AirplaneBookingSystemStyles.axaml"/>
+	</Window.Styles>
+
+	<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+		<Grid Classes="MainGrid" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*">
+			<StackPanel Grid.Row="0" Orientation="Horizontal">
+				<Image Source="/Assets/ticket-pic.png"/>
+				<Label>Tickets</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="1" Orientation="Horizontal">
+				<Button Classes="ToolButton" Command="{Binding OnAddCommandTicket}">
+					<Image Source="/Assets/add-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnDeleteCommandTicket}">
+					<Image Source="/Assets/remove-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnChangeCommandTicket}">
+					<Image Source="/Assets/settings-pic.png"/>
+				</Button>
+			</StackPanel>
+			<DataGrid Grid.Row="3" AutoGenerateColumns="False"
+					   Items="{Binding Tickets}"
+					   SelectedItem="{Binding SelectedTicket}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Number of ticket" Binding="{Binding TicketNumber}"/>
+					<DataGridTextColumn Header="Client id" Binding="{Binding ClientId}"/>
+					<DataGridTextColumn Header="Flight id" Binding="{Binding FlightId}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+			
+			<StackPanel Grid.Row="4" Orientation="Horizontal">
+				<Image Source="/Assets/airplane-pic.png"/>
+				<Label>Airplanes</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="5" Orientation="Horizontal">
+				<Button Classes="ToolButton" Command="{Binding OnAddCommandAirplane}">
+					<Image Source="/Assets/add-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnDeleteCommandAirplane}">
+					<Image Source="/Assets/remove-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnChangeCommandAirplane}">
+					<Image Source="/Assets/settings-pic.png"/>
+				</Button>
+			</StackPanel>
+			<DataGrid Grid.Row="6" AutoGenerateColumns="False"
+					   Items="{Binding Airplanes}"
+					   SelectedItem="{Binding SelectedAirplane}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Model of airplane" Binding="{Binding Model}"/> 
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<StackPanel Grid.Row="7" Orientation="Horizontal">
+				<Image Source="/Assets/flight-pic.png"/>
+				<Label>Flights</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="8" Orientation="Horizontal">
+				<Button Classes="ToolButton" Command="{Binding OnAddCommandFlight}">
+					<Image Source="/Assets/add-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnDeleteCommandFlight}">
+					<Image Source="/Assets/remove-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnChangeCommandFlight}">
+					<Image Source="/Assets/settings-pic.png"/>
+				</Button>
+			</StackPanel>
+			<DataGrid Grid.Row="9" AutoGenerateColumns="False"
+					   Items="{Binding Flights}"
+					   SelectedItem="{Binding SelectedFlight}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Number of flight" Binding="{Binding NumberOfFlight}"/>
+					<DataGridTextColumn Header="Departure city" Binding="{Binding DepartureCity}"/>
+					<DataGridTextColumn Header="Arrival city" Binding="{Binding ArrivalCity}"/>
+					<DataGridTextColumn Header="Departure date" Binding="{Binding DepartureDate}"/>
+					<DataGridTextColumn Header="Arrival date" Binding="{Binding ArrivalDate}"/>
+					<DataGridTextColumn Header="Flight`s airplane id" Binding="{Binding AirplaneId}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<StackPanel Grid.Row="10" Orientation="Horizontal">
+				<Image Source="/Assets/client-pic.png"/>
+				<Label>Clients</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="11" Orientation="Horizontal">
+				<Button Classes="ToolButton" Command="{Binding OnAddCommandClient}">
+					<Image Source="/Assets/add-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnDeleteCommandClient}">
+					<Image Source="/Assets/remove-pic.png"/>
+				</Button>
+				<Button Classes="ToolButton" Command="{Binding OnChangeCommandClient}">
+					<Image Source="/Assets/settings-pic.png"/>
+				</Button>
+			</StackPanel>
+			<DataGrid Grid.Row="12" AutoGenerateColumns="False"
+					   Items="{Binding Clients}"
+					   SelectedItem="{Binding SelectedClient}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Full name" Binding="{Binding Name}"/>
+					<DataGridTextColumn Header="Passport number" Binding="{Binding PassportNumber}"/>
+					<DataGridTextColumn Header="Birthday data" Binding="{Binding BirthdayData}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+
+			<StackPanel Grid.Row="13" Orientation="Horizontal">
+				<Image Source="/Assets/star-pic.png"/>
+				<Label>Flights wiht max count of clients</Label>
+			</StackPanel>
+			<DataGrid Grid.Row="14" AutoGenerateColumns="False"
+					   Items="{Binding FlightWithMaxAmountOfClients}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Number of flight" Binding="{Binding NumberOfFlight}"/>
+					<DataGridTextColumn Header="Departure city" Binding="{Binding DepartureCity}"/>
+					<DataGridTextColumn Header="Arrival city" Binding="{Binding ArrivalCity}"/>
+					<DataGridTextColumn Header="Departure date" Binding="{Binding DepartureDate}"/>
+					<DataGridTextColumn Header="Arrival date" Binding="{Binding ArrivalDate}"/>
+					<DataGridTextColumn Header="Flight`s airplane id" Binding="{Binding AirplaneId}"/>
+				</DataGrid.Columns>
+			</DataGrid>
+			
+		</Grid>
+	</ScrollViewer>
+</Window>

@@ -1,0 +1,286 @@
+﻿@page "/analytics"
+
+@using AirplaneBookingSystem.BlazorClient.Dto
+@using AirplaneBookingSystem.BlazorClient.Services.Analytics
+@using AirplaneBookingSystem.BlazorClient.Services.Tickets
+@using Microsoft.AspNetCore.Authorization
+@using TicketBookingSystem.BlazorClient.Services.Tickets
+@using AutoMapper
+@using Blazorise.DataGrid
+
+@inject IAnalyticsService AnalyticsService
+@inject IMapper AutoMapper
+
+@attribute [Authorize(Roles = "admin")]
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        All Flights
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="FlightGetDto"
+              Data="@_allFlights"
+              Responsive
+              ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(FlightGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureDate)" Caption="Departure date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureCity)" Caption="Departure city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalDate)" Caption="Arrival date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalCity)" Caption="Arrival city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.AirplaneId)" Caption="Airplane Id" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.NumberOfFlight)" Caption="Number of flight" Editable />
+        </DataGridColumns>
+    </DataGrid>
+</Card>
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Top 5 Flights
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="FlightGetDto"
+              Data="@_topFiveFlights"
+              Responsive
+              ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(FlightGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureDate)" Caption="Departure date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureCity)" Caption="Departure city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalDate)" Caption="Arrival date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalCity)" Caption="Arrival city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.AirplaneId)" Caption="Airplane Id" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.NumberOfFlight)" Caption="Number of flight" Editable />
+        </DataGridColumns>
+    </DataGrid>
+</Card>
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Flights With Max Amount of Clients
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="FlightGetDto"
+              Data="@_flightsWithMaxCountOfClient"
+              Responsive
+              ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(FlightGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureDate)" Caption="Departure date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureCity)" Caption="Departure city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalDate)" Caption="Arrival date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalCity)" Caption="Arrival city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.AirplaneId)" Caption="Airplane Id" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.NumberOfFlight)" Caption="Number of flight" Editable />
+        </DataGridColumns>
+    </DataGrid>
+</Card>
+
+<Card Margin="Margin.Is2">
+    <Column>
+        <Text TextSize="TextSize.Heading4">
+            Clients With Specific Departure City
+        </Text>
+        <Field>
+            <FieldLabel>
+                Departure City
+            </FieldLabel>
+            <FieldBody>
+                <TextEdit @bind-Text="@_specificDeparureCityForClientsStatistics"></TextEdit>
+                <Button Clicked="@(async () => _clientsStatisticsFromSpecifiedDepartureCity = await FindClientsWithDepartureCity())">
+                    <Icon Name="IconName.Search" />
+                </Button>
+            </FieldBody>
+        </Field>
+    </Column>
+</Card>
+<Card Margin="Margin.Is2">
+    <ListGroup>
+        @foreach (var clientStatistics in _clientsStatisticsFromSpecifiedDepartureCity)
+        {
+            <ListGroupItem>
+                @clientStatistics.Key: @clientStatistics.Value
+            </ListGroupItem>
+        }
+    </ListGroup>
+</Card>
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Clients With Specific Flight Id
+    </Text>
+    <Field>
+        <FieldLabel>
+            FlightId
+        </FieldLabel>
+        <FieldBody>
+            <NumericPicker @bind-Value="@_specificFlightNumberFlightsForClientStatistics"></NumericPicker>
+            <Button Clicked="@(async () => _clientsWithSpecificFlight = await FindClientsWithFlight())">
+                <Icon Name="IconName.Search" />
+            </Button>
+        </FieldBody>
+    </Field>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="ClientGetDto"
+              Data="@_clientsWithSpecificFlight"
+              Responsive
+              ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(ClientGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(ClientGetDto.Name)" Caption="Name" Editable />
+            <DataGridColumn Field="@nameof(ClientGetDto.BirthdayDate)" Caption="Birthday" Editable />
+            <DataGridColumn Field="@nameof(ClientGetDto.PassportNumber)" Caption="Passport number" Editable />
+        </DataGridColumns>
+    </DataGrid>
+</Card>
+
+<Card Margin="Margin.Is2">
+    <Column>
+        <Text TextSize="TextSize.Heading4">
+            Flight With Specific Departure City and DepartureDate
+        </Text>
+        <Field>
+            <FieldLabel>
+                Departure city
+            </FieldLabel>
+            <FieldBody>
+                <TextEdit @bind-Text="@_specificDeparureCityForFlightsStatistics"></TextEdit>
+            </FieldBody>
+        </Field>
+        <Field>
+            <FieldLabel>
+                Departure date
+            </FieldLabel>
+            <FieldBody>
+                <DateEdit @bind-Date="@_specificDepartureDateForFlightStatistics" InputMode="DateInputMode.DateTime"></DateEdit>
+            </FieldBody>
+        </Field>
+        <Button Clicked="@(async () => _flighsWithSpecificDepartureCityAndDate = await FindFlightsWithCityAndDate())">
+            <Icon Name="IconName.Search" />
+        </Button>
+    </Column>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="FlightGetDto"
+              Data="@_flighsWithSpecificDepartureCityAndDate"
+              Responsive
+              ShowPager
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(FlightGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureDate)" Caption="Departure date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureCity)" Caption="Departure city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalDate)" Caption="Arrival date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalCity)" Caption="Arrival city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.AirplaneId)" Caption="Airplane Id" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.NumberOfFlight)" Caption="Number of flight" Editable />
+        </DataGridColumns>
+    </DataGrid>
+</Card>
+
+@code {
+    private List<FlightGetDto> _allFlights = [];
+    private List<ClientGetDto> _clientsWithSpecificFlight = [];
+    private List<FlightGetDto> _flighsWithSpecificDepartureCityAndDate = [];
+    private List<FlightGetDto> _topFiveFlights = [];
+    private List<FlightGetDto> _flightsWithMaxCountOfClient = [];
+    private Dictionary<string, double> _clientsStatisticsFromSpecifiedDepartureCity = [];
+
+    private uint _specificFlightNumberFlightsForClientStatistics;
+
+    private string _specificDeparureCityForClientsStatistics = string.Empty;
+
+    private string _specificDeparureCityForFlightsStatistics = string.Empty;
+    private DateTime _specificDepartureDateForFlightStatistics;
+
+    private TicketGetDto? _selectedTicket = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allFlights = await AnalyticsService.GetAllFlights();
+        _topFiveFlights = await AnalyticsService.GetTopFiveFlights();
+        _flightsWithMaxCountOfClient = await AnalyticsService.FlightsWithMaxCountOfClients();
+    }
+
+    private async Task<Dictionary<string, double>> FindClientsWithDepartureCity()
+    {
+        return await AnalyticsService.GetClientsStatisticsFromSpecifiedDepartureCity(_specificDeparureCityForClientsStatistics);
+    }
+
+    private async Task<List<ClientGetDto>> FindClientsWithFlight()
+    {
+        try
+        {
+            return await AnalyticsService.GetClientsWithSpecificFlight(_specificFlightNumberFlightsForClientStatistics);
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+    }
+
+    private async Task<List<FlightGetDto>> FindFlightsWithCityAndDate()
+    {
+        try
+        {
+            return await AnalyticsService.GetFlightsWithSpecificDepartureCityAndDate(_specificDeparureCityForFlightsStatistics, _specificDepartureDateForFlightStatistics);
+        }
+        catch (Exception)
+        {
+            return [];
+        }
+    }
+}

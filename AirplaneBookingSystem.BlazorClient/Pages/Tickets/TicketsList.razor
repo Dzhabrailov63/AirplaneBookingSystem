@@ -1,0 +1,84 @@
+﻿@page "/tickets"
+
+@using AirplaneBookingSystem.BlazorClient.Dto
+@using AirplaneBookingSystem.BlazorClient.Services.Tickets
+@using Microsoft.AspNetCore.Authorization
+@using TicketBookingSystem.BlazorClient.Services.Tickets
+@using AutoMapper
+@using Blazorise.DataGrid
+
+@inject ITicketService TicketService
+@inject IMapper AutoMapper
+
+@attribute [Authorize(Roles = "admin,user")]
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Tickets
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="TicketGetDto"
+              Data="@_tickets"
+              @bind-SelectedRow="@_selectedTicket"
+              Editable
+              Responsive
+              ShowPager
+              RowInserted="OnTicketAdded"
+              RowUpdated="OnTicketUpdated"
+              RowRemoved="OnTicketDeleted"
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(TicketGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(TicketGetDto.TicketNumber)" Caption="Ticket number" Editable />
+            <DataGridColumn Field="@nameof(TicketGetDto.ClientId)" Caption="Client Id" Editable />
+            <DataGridColumn Field="@nameof(TicketGetDto.FlightId)" Caption="Flight Id" Editable />
+        </DataGridColumns>
+        <ButtonRowTemplate>
+            <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
+            <Button Color="Color.Primary" Disabled="(_selectedTicket is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+            <Button Color="Color.Danger" Disabled="(_selectedTicket is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</Card>
+
+@code {
+
+    private IEnumerable<TicketGetDto> _tickets = [];
+    private TicketGetDto? _selectedTicket = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _tickets = await TicketService.GetList();
+    }
+
+    private async Task OnTicketUpdated(SavedRowItem<TicketGetDto, Dictionary<string, object>> e)
+    {
+        var updatedTicket = e.NewItem;
+        var updatedTicketPostDto = AutoMapper.Map<TicketGetDto, TicketPostDto>(updatedTicket);
+        await TicketService.Put(updatedTicket.Id, updatedTicketPostDto);
+    }
+
+    private async Task OnTicketAdded(SavedRowItem<TicketGetDto, Dictionary<string, object>> e)
+    {
+        var addedTicket = e.NewItem;
+        var addedTicketPostDto = AutoMapper.Map<TicketGetDto, TicketPostDto>(addedTicket);
+        var idOfTheNewlyAddedTicket =  await TicketService.Post(addedTicketPostDto);
+
+        e.OldItem.Id = idOfTheNewlyAddedTicket;
+    }
+
+    private async Task OnTicketDeleted(TicketGetDto ticketToDelete)
+    {
+        await TicketService.Delete(ticketToDelete.Id);
+    }
+}

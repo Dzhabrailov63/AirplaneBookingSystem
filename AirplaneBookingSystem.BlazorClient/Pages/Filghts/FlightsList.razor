@@ -1,0 +1,86 @@
+﻿@page "/flights"
+
+@using AirplaneBookingSystem.BlazorClient.Dto
+@using AutoMapper
+@using Blazorise.DataGrid
+@using FlightBookingSystem.BlazorClient.Services.Flights
+@using Microsoft.AspNetCore.Authorization
+
+@inject IFlightService FlightService
+@inject IMapper AutoMapper
+
+@attribute [Authorize(Roles = "admin,user")]
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Flights
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="FlightGetDto"
+              Data="@_flights"
+              @bind-SelectedRow="@_selectedFlight"
+              Editable
+              Responsive
+              ShowPager
+              RowInserted="OnFlightAdded"
+              RowUpdated="OnFlightUpdated"
+              RowRemoved="OnFlightDeleted"
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(FlightGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureDate)" Caption="Departure date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.DepartureCity)" Caption="Departure city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalDate)" Caption="Arrival date" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.ArrivalCity)" Caption="Arrival city" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.AirplaneId)" Caption="Airplane Id" Editable />
+            <DataGridColumn Field="@nameof(FlightGetDto.NumberOfFlight)" Caption="Number of flight" Editable />
+        </DataGridColumns>
+        <ButtonRowTemplate>
+            <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
+            <Button Color="Color.Primary" Disabled="(_selectedFlight is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+            <Button Color="Color.Danger" Disabled="(_selectedFlight is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</Card>
+
+@code {
+
+    private IEnumerable<FlightGetDto> _flights = [];
+    private FlightGetDto? _selectedFlight = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _flights = await FlightService.GetList();
+    }
+
+    private async Task OnFlightUpdated(SavedRowItem<FlightGetDto, Dictionary<string, object>> e)
+    {
+        var updatedFlight = e.NewItem;
+        var updatedFlightPostDto = AutoMapper.Map<FlightGetDto, FlightPostDto>(updatedFlight);
+        await FlightService.Put(updatedFlight.Id, updatedFlightPostDto);
+    }
+
+    private async Task OnFlightAdded(SavedRowItem<FlightGetDto, Dictionary<string, object>> e)
+    {
+        var addedFlight = e.NewItem;
+        var addedFlightPostDto = AutoMapper.Map<FlightGetDto, FlightPostDto>(addedFlight);
+        var idOfTheNewlyAddedFlight = await FlightService.Post(addedFlightPostDto);
+
+        e.OldItem.Id = idOfTheNewlyAddedFlight;
+    }
+
+    private async Task OnFlightDeleted(FlightGetDto flightToDelete)
+    {
+        await FlightService.Delete(flightToDelete.Id);
+    }
+}

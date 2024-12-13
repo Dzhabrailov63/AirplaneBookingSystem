@@ -1,0 +1,81 @@
+﻿@page "/airplanes"
+
+@using AirplaneBookingSystem.BlazorClient.Dto
+@using AirplaneBookingSystem.BlazorClient.Services.Airplanes
+@using AutoMapper
+@using Blazorise.DataGrid
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAirplaneService AirplaneService
+@inject IMapper AutoMapper
+
+@attribute [Authorize(Roles = "admin,user")]
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Airplanes
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="AirplaneGetDto"
+              Data="@_airplanes"
+              @bind-SelectedRow="@_selectedAirplane"
+              Editable
+              Responsive
+              ShowPager
+              RowInserted="OnAirplaneAdded"
+              RowUpdated="OnAirplaneUpdated"
+              RowRemoved="OnAirplaneDeleted"
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(AirplaneGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(AirplaneGetDto.Model)" Caption="Model" Editable />
+        </DataGridColumns>
+        <ButtonRowTemplate>
+            <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
+            <Button Color="Color.Primary" Disabled="(_selectedAirplane is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+            <Button Color="Color.Danger" Disabled="(_selectedAirplane is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</Card>
+
+@code {
+
+    private IEnumerable<AirplaneGetDto> _airplanes = [];
+    private AirplaneGetDto? _selectedAirplane = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _airplanes = await AirplaneService.GetList();
+    }
+
+    private async Task OnAirplaneUpdated(SavedRowItem<AirplaneGetDto, Dictionary<string, object>> e)
+    {
+        var updatedAirplane = e.NewItem;
+        var updatedAirplanePostDto = AutoMapper.Map<AirplaneGetDto, AirplanePostDto>(updatedAirplane);
+        await AirplaneService.Put(updatedAirplane.Id, updatedAirplanePostDto);
+    }
+
+    private async Task OnAirplaneAdded(SavedRowItem<AirplaneGetDto, Dictionary<string, object>> e)
+    {
+        var addedAirplane = e.NewItem;
+        var addedAirplanePostDto = AutoMapper.Map<AirplaneGetDto, AirplanePostDto>(addedAirplane);
+        var idOfTheNewlyAddedAirplane =  await AirplaneService.Post(addedAirplanePostDto);
+
+        e.OldItem.Id = idOfTheNewlyAddedAirplane;
+    }
+
+    private async Task OnAirplaneDeleted(AirplaneGetDto airplaneToDelete)
+    {
+        await AirplaneService.Delete(airplaneToDelete.Id);
+    }
+}

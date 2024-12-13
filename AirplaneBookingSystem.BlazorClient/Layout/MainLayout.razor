@@ -1,0 +1,136 @@
+﻿@using AirplaneBookingSystem.BlazorClient.Pages.Authorization
+﻿@using BlazorClient.Pages
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inherits LayoutComponentBase
+
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject IConfiguration Configuration
+@inject NavigationManager NavigationManager
+@inject IModalService ModalService
+
+<div class="page">
+    <main>
+        <Layout>
+            <LayoutHeader>
+                <Bar Class="app-header"
+                     Breakpoint="Breakpoint.Desktop"
+                     Mode="BarMode.Horizontal"
+                     Background="Background.Primary">
+                    <Button Clicked="ChangeSideBarVisibility"
+                            Outline="false">
+                        <Icon Name="GetIconForSideBarToggler()" />
+                    </Button>
+                    <BarBrand>
+                        <BarItem>
+                            <BarLink To="/">
+                                Airplane Booking System
+                            </BarLink>
+                        </BarItem>
+                    </BarBrand>
+                    <BarMenu>
+                        <BarEnd>
+                            @if (_authenticated)
+                            {
+                                <BarItem>
+                                    <Button Color="Color.Primary" Clicked="LogoutHandle">Log out</Button>
+                                </BarItem>
+                            }
+                            else
+                            {
+                                <BarItem>
+                                    <Button Color="Color.Primary" Clicked="ShowSignUpModal">Sign Up</Button>
+                                </BarItem>
+                                <BarItem>
+                                    <Button Color="Color.Primary" Clicked="ShowLoginModal">Log In</Button>
+                                </BarItem>
+                            }
+                        </BarEnd>
+                    </BarMenu>
+                </Bar>
+            </LayoutHeader>
+            <Layout Sider>
+                <LayoutSider>
+                    <LayoutSiderContent>
+                        <Bar Class="main-sidebar"
+                             Mode="BarMode.VerticalInline"
+                             Shadow="Shadow.Default"
+                             Breakpoint="Breakpoint.None"
+                             NavigationBreakpoint="Breakpoint.Tablet"
+                             Background="Background.Secondary"
+                             ThemeContrast="ThemeContrast.Light"
+                             Visible="_isSideBarVisible">
+                            <SiderContent />
+                        </Bar>
+                    </LayoutSiderContent>
+                </LayoutSider>
+                <Layout>
+                    <LayoutContent>
+                        @Body
+                    </LayoutContent>
+                </Layout>
+            </Layout>
+        </Layout>
+    </main>
+</div>
+
+@code {
+    private bool _isSideBarVisible;
+    private bool _authenticated = false;
+
+    private void ChangeSideBarVisibility()
+    {
+        _isSideBarVisible = !_isSideBarVisible;
+    }
+
+    private IconName GetIconForSideBarToggler()
+    {
+        return _isSideBarVisible ? IconName.AngleLeft : IconName.Bars;
+    }
+
+    private void Auth()
+    {
+        _authenticated = true;
+        StateHasChanged();
+    }
+
+    private async Task LogoutHandle()
+    {
+        await LocalStorage.RemoveItemAsync("token");
+        _authenticated = false;
+        NavigationManager.NavigateTo("/");
+        await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsStringAsync("token");
+
+        if (!string.IsNullOrEmpty(token))
+            Auth();
+    }
+
+    public Task ShowLoginModal()
+    {
+        return ModalService.Show<LoginModal>(x =>
+        {
+            x.Add(x => x.OnAuth, Auth);
+        },
+        new ModalInstanceOptions()
+            {
+                UseModalStructure = false
+            });
+    }
+
+    public Task ShowSignUpModal()
+    {
+        return ModalService.Show<SignUpModal>(_ =>
+        new ModalInstanceOptions()
+            {
+                UseModalStructure = false
+            });
+    }
+}

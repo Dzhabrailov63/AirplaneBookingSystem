@@ -1,0 +1,83 @@
+﻿@page "/clients"
+
+@using AirplaneBookingSystem.BlazorClient.Dto
+@using ClientBookingSystem.BlazorClient.Services.Clients
+@using AutoMapper
+@using Blazorise.DataGrid
+@using Microsoft.AspNetCore.Authorization
+
+@inject IClientService ClientService
+@inject IMapper AutoMapper
+
+@attribute [Authorize(Roles = "admin,user")]
+
+<Card Margin="Margin.Is2">
+    <Text TextSize="TextSize.Heading4">
+        Clients
+    </Text>
+</Card>
+<Card Margin="Margin.Is2">
+    <DataGrid TItem="ClientGetDto"
+              Data="@_clients"
+              @bind-SelectedRow="@_selectedClient"
+              Editable
+              Responsive
+              ShowPager
+              RowInserted="OnClientAdded"
+              RowUpdated="OnClientUpdated"
+              RowRemoved="OnClientDeleted"
+              CommandMode="DataGridCommandMode.ButtonRow"
+              EditMode="DataGridEditMode.Popup">
+        <DataGridColumns>
+            <DataGridCommandColumn NewCommandAllowed="false" EditCommandAllowed="false" DeleteCommandAllowed="false" CancelCommandAllowed>
+                <SaveCommandTemplate>
+                    <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+            <DataGridColumn Field="@nameof(ClientGetDto.Id)" Caption="#" Sortable="false" />
+            <DataGridColumn Field="@nameof(ClientGetDto.Name)" Caption="Name" Editable />
+            <DataGridColumn Field="@nameof(ClientGetDto.BirthdayDate)" Caption="Birthday" Editable />
+            <DataGridColumn Field="@nameof(ClientGetDto.PassportNumber)" Caption="Passport number" Editable />
+        </DataGridColumns>
+        <ButtonRowTemplate>
+            <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
+            <Button Color="Color.Primary" Disabled="(_selectedClient is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+            <Button Color="Color.Danger" Disabled="(_selectedClient is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+        </ButtonRowTemplate>
+    </DataGrid>
+</Card>
+
+@code {
+
+    private IEnumerable<ClientGetDto> _clients = [];
+    private ClientGetDto? _selectedClient = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _clients = await ClientService.GetList();
+    }
+
+    private async Task OnClientUpdated(SavedRowItem<ClientGetDto, Dictionary<string, object>> e)
+    {
+        var updatedClient = e.NewItem;
+        var updatedClientPostDto = AutoMapper.Map<ClientGetDto, ClientPostDto>(updatedClient);
+        await ClientService.Put(updatedClient.Id, updatedClientPostDto);
+    }
+
+    private async Task OnClientAdded(SavedRowItem<ClientGetDto, Dictionary<string, object>> e)
+    {
+        var addedClient = e.NewItem;
+        var addedClientPostDto = AutoMapper.Map<ClientGetDto, ClientPostDto>(addedClient);
+        var idOfTheNewlyAddedClient = await ClientService.Post(addedClientPostDto);
+
+        e.OldItem.Id = idOfTheNewlyAddedClient;
+    }
+
+    private async Task OnClientDeleted(ClientGetDto clientToDelete)
+    {
+        await ClientService.Delete(clientToDelete.Id);
+    }
+}
