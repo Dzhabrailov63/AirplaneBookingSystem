@@ -13,7 +13,7 @@ public class AirplaneBookingSystemDbContext : DbContext
 
     public AirplaneBookingSystemDbContext(DbContextOptions options) : base(options)
     {
-        Database.EnsureDeleted();   // удаляем бд со старой схемой
+        //Database.EnsureDeleted();   // удаляем бд со старой схемой
         Database.EnsureCreated();
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
